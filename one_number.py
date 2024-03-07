@@ -41,8 +41,14 @@ class one_number_class():
 
     def integer_length(self):
         return len(self.the_integer)
-                    
 
+    def float_length(self):
+        return len(self.the_float)                    
+    
+    def Is_Zero(self):
+
+        return len([x for x in self.the_float if not x=='0'])==0 and len([x for x in self.the_integer if not x=='0'])==0
+    
     def add_a_zero(self, which):
         
         if which=='Integer':
@@ -50,6 +56,39 @@ class one_number_class():
         else:
             self.the_float.append('0')
 
+
+    def undo_exp_notation(self):
+
+        if self.the_exponent==None:
+            return
+        
+        while not self.the_exponent.Is_Zero():
+            if self.the_exponent.is_negative():
+                if len(self.the_integer)>0:
+                    one_digit = self.the_integer.pop(0)
+                else:
+                    one_digit = '0'
+                    
+                self.the_float.insert(0,one_digit)
+                self.the_exponent = self.the_exponent  + number_one
+            else:
+                if len(self.the_float)>0:
+                    one_digit = self.the_float.pop(0)
+                else:
+                    one_digit = '0'
+                    
+                self.the_integer.insert(0,one_digit)
+                self.the_exponent = self.the_exponent  - number_one                    
+
+        if len(self.the_float)==0:
+            return
+        
+        while self.the_float[-1]=='0':
+            self.the_float.pop(-1)
+            if len(self.the_float)==0:
+                break
+
+###############################Arithmatic Operators############################
     def __add__(self,other):
 
         new_number=None
@@ -85,6 +124,91 @@ class one_number_class():
 
         return new_number    
 
+######################Comparison Operators############################
+    
+    def __eq__(self,other):
+        return not self>other and not  other>self
 
+    def __lt__(self, other):
+        return other>self
+
+    def __le__(self,other):
+        return not self>other
+
+    def __gt__(self,other):
+        
+        X=copy.deepcopy(self)
+        Y=copy.deepcopy(other)
+        
+        X.undo_exp_notation()
+        Y.undo_exp_notation()
+
+        if X.Is_Zero() and Y.is_negative():
+            return  True
+
+        if X.Is_Zero() and not Y.is_negative():
+            return  False
+
+        if Y.Is_Zero() and X.is_negative():
+            return  False
+
+        if Y.Is_Zero() and X.is_negative():
+            return  True
+
+        if X.is_negative() and not Y.is_negative():
+            return False
+        
+        if not X.is_negative() and Y.is_negative():
+            return True
+
+        
+        while X.integer_length()<Y.integer_length():
+            X.add_a_zero('Integer')
+
+        if X.is_negative() and Y.is_negative():
+            Z=X
+            X=Y
+            Y=Z
+            return X<Y
+
+        if X.integer_length()>Y.integer_length():
+            return True
+        
+        while Y.integer_length()<X.integer_length():
+            Y.add_a_zero('Integer')        
+
+        comparison_pieces_A = [''.join(y) for y in list(zip(X.the_integer,Y.the_integer))]
+
+        for one_piece in reversed(comparison_pieces_A):
+            if the_digit_comparison[one_piece]=='False':
+         
+                return False
+            
+            elif the_digit_comparison[one_piece]=='True':
+
+                return True
+ 
+        #now look at the float portion because the integers must be equal
+        while Y.float_length()<X.float_length():
+            Y.add_a_zero('Float')                  
+
+        while X.float_length()<Y.float_length():
+            X.add_a_zero('Float')              
+
+        comparison_pieces_A = [''.join(y) for y in list(zip(X.the_float,Y.the_float))]
+
+        for one_piece in comparison_pieces_A:
+            if the_digit_comparison[one_piece]=='False':
+         
+                return False
+            
+            elif the_digit_comparison[one_piece]=='True':
+
+                return True
+                        
+        return False
+    def __ge__(self,other):
+        return other<=self
+    
 number_one = one_number_class('1')
 number_zero = one_number_class('0')  
